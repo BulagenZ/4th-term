@@ -17,7 +17,7 @@
             height: 100vh;
         }
         .container {
-            background: white;
+            background: black;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -57,7 +57,7 @@
             color: #333;
         }
         mark {
-            background-color: yellow;
+            background-color: pink;
             color: black;
         }
     </style>
