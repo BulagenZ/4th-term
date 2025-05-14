@@ -1,113 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Letter or Word Search</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 150px;
-      margin: 10px 0;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      resize: vertical;
-      box-sizing: border-box;
-    }
-    #output {
-      margin-top: 20px;
-      white-space: pre-wrap;
-      background-color: #f0f0f0;
-      padding: 10px;
-      border-radius: 5px;
-      min-height: 50px;
-    }
-    strong {
-      background-color: yellow;
-      font-weight: normal;
-    }
-    .error {
-      color: red;
-    }
-    .controls {
-      margin: 10px 0;
-    }
-    button {
-      padding: 8px 16px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск и выделение слова</title>
+    <script src="https://cdn.jsdelivr.net/npm/pyodide@0.21.1/pyodide.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 20px;
+            color: #333;
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #highlighted-text {
+            font-size: 16px;
+            color: #333;
+        }
+        mark {
+            background-color: yellow;
+            color: black;
+        }
+    </style>
 </head>
 <body>
-  <h2>Search Letter or Word in Text</h2>
-  <label for="textInput">Enter text to search:</label>
-  <textarea id="textInput" placeholder="Write or paste your text here..."></textarea>
-  <div class="controls">
-    <label for="wordInput">Letter or word to search:</label>
-    <input type="text" id="wordInput">
-    <label><input type="checkbox" id="caseSensitive"> Case sensitive</label>
-    <label><input type="checkbox" id="wholeWord"> Whole word only</label>
-  </div>
-  <button onclick="searchText()">Search</button>
+    <div class="container">
+        <h1>Поиск и выделение слова</h1>
+        <textarea id="text" rows="6" placeholder="Введите текст здесь..."></textarea>
+        <input type="text" id="word" placeholder="Введите слово для поиска..." />
+        <button id="search-button">Выделить слово</button>
+        <div id="highlighted-text"></div>
+    </div>
 
-  <div id="output"></div>
+    <script>
+        loadPyodide().then(pyodide => {
+            document.getElementById('search-button').addEventListener('click', function() {
+                const text = document.getElementById('text').value;
+                const word = document.getElementById('word').value;
 
-  <script>
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
+                const pythonCode = `
+text = '''${text}'''
+word = '''${word}'''
+highlighted_text = text.replace(word, '<mark>' + word + '</mark>')
+highlighted_text
+`;
 
-    function searchText() {
-      const text = document.getElementById('textInput').value;
-      const word = document.getElementById('wordInput').value.trim();
-      const caseSensitive = document.getElementById('caseSensitive').checked;
-      const wholeWord = document.getElementById('wholeWord').checked;
-      const output = document.getElementById('output');
-
-      // Reset output
-      output.innerHTML = '';
-      output.classList.remove('error');
-
-      // Validate inputs
-      if (!text) {
-        output.classList.add('error');
-        output.textContent = 'Error: Please enter text to search.';
-        return;
-      }
-      if (!word) {
-        output.classList.add('error');
-        output.textContent = 'Error: Please enter a letter or word to search for.';
-        return;
-      }
-
-      try {
-        const escapedWord = escapeRegExp(word);
-        let regexPattern = wholeWord ? `\\b${escapedWord}\\b` : escapedWord;
-        let regexFlags = caseSensitive ? 'g' : 'gi';
-        const regex = new RegExp(regexPattern, regexFlags);
-        const matches = text.match(regex);
-        if (matches) {
-          const highlighted = text.replace(regex, '<strong>$&</strong>');
-          output.innerHTML = highlighted;
-        } else {
-          output.textContent = 'No matches found.';
-        }
-      } catch (err) {
-        output.classList.add('error');
-        output.textContent = 'Error: Invalid search term.';
-      }
-    }
-  </script>
+                pyodide.runPythonAsync(pythonCode).then(result => {
+                    document.getElementById('highlighted-text').innerHTML = result;
+                });
+            });
+        });
+    </script>
 </body>
 </html>
