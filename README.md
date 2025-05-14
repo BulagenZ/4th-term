@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Поиск и выделение слова</title>
+    <title>Search and highlighting a word</title>
     <script src="https://cdn.jsdelivr.net/npm/pyodide@0.21.1/pyodide.js"></script>
     <style>
         body {
@@ -64,10 +64,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Поиск и выделение слова</h1>
-        <textarea id="text" rows="6" placeholder="Введите текст здесь..."></textarea>
-        <input type="text" id="word" placeholder="Введите слово для поиска..." />
-        <button id="search-button">Выделить слово</button>
+        <h1>Search and highlighting a word</h1>
+        <textarea id="text" rows="6" placeholder="Type text here..."></textarea>
+        <input type="text" id="word" placeholder="Highlight a word for search..." />
+        <button id="search-button">Highlight a word</button>
         <div id="highlighted-text"></div>
     </div>
 
