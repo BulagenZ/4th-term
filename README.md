@@ -2,11 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Letter or Word Highlighter</title>
+  <title>Letter or Word Search</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin: 10px 0;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+      box-sizing: border-box;
     }
     #output {
       margin-top: 20px;
@@ -18,56 +28,38 @@
     }
     strong {
       background-color: yellow;
+      font-weight: normal;
     }
     .error {
       color: red;
     }
-    .loading {
-      color: blue;
-    }
     .controls {
       margin: 10px 0;
     }
-    /* Custom file input styling */
-    .file-input-wrapper {
-      display: inline-block;
-      position: relative;
-      margin-bottom: 10px;
-    }
-    .file-input-wrapper input[type="file"] {
-      opacity: 0;
-      width: 0;
-      height: 0;
-      position: absolute;
-    }
-    .file-input-wrapper label {
-      display: inline-block;
+    button {
       padding: 8px 16px;
       background-color: #4CAF50;
       color: white;
+      border: none;
       border-radius: 4px;
       cursor: pointer;
-      text-align: center;
     }
-    .file-input-wrapper label:hover {
+    button:hover {
       background-color: #45a049;
     }
   </style>
 </head>
 <body>
-  <h2>Highlight Letter or Word in Uploaded File</h2>
-  <div class="file-input-wrapper">
-    <label for="fileInput">Select Text File</label>
-    <input type="file" id="fileInput" accept=".txt">
-  </div>
-  <p><small>Supported file type: Plain text (.txt)</small></p>
+  <h2>Search Letter or Word in Text</h2>
+  <label for="textInput">Enter text to search:</label>
+  <textarea id="textInput" placeholder="Write or paste your text here..."></textarea>
   <div class="controls">
-    <label for="wordInput">Letter or word to highlight:</label>
+    <label for="wordInput">Letter or word to search:</label>
     <input type="text" id="wordInput">
     <label><input type="checkbox" id="caseSensitive"> Case sensitive</label>
     <label><input type="checkbox" id="wholeWord"> Whole word only</label>
   </div>
-  <button onclick="processFile()">Highlight</button>
+  <button onclick="searchText()">Search</button>
 
   <div id="output"></div>
 
@@ -76,8 +68,8 @@
       return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    function processFile() {
-      const fileInput = document.getElementById('fileInput');
+    function searchText() {
+      const text = document.getElementById('textInput').value;
       const word = document.getElementById('wordInput').value.trim();
       const caseSensitive = document.getElementById('caseSensitive').checked;
       const wholeWord = document.getElementById('wholeWord').checked;
@@ -85,53 +77,36 @@
 
       // Reset output
       output.innerHTML = '';
-      output.classList.remove('error', 'loading');
+      output.classList.remove('error');
 
       // Validate inputs
-      if (!fileInput.files[0]) {
+      if (!text) {
         output.classList.add('error');
-        output.textContent = 'Error: Please upload a text file.';
+        output.textContent = 'Error: Please enter text to search.';
         return;
       }
       if (!word) {
         output.classList.add('error');
-        output.textContent = 'Error: Please enter a letter or word to highlight.';
+        output.textContent = 'Error: Please enter a letter or word to search for.';
         return;
       }
 
-      // Check file size (limit to 1MB for safety)
-      if (fileInput.files[0].size > 1024 * 1024) {
-        output.classList.add('error');
-        output.textContent = 'Error: File is too large (max 1MB).';
-        return;
-      }
-
-      // Show loading message
-      output.classList.add('loading');
-      output.textContent = 'Processing file...';
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          let text = e.target.result;
-          const escapedWord = escapeRegExp(word);
-          let regexPattern = wholeWord ? `\\b${escapedWord}\\b` : escapedWord;
-          let regexFlags = caseSensitive ? 'g' : 'gi';
-          const regex = new RegExp(regexPattern, regexFlags);
+      try {
+        const escapedWord = escapeRegExp(word);
+        let regexPattern = wholeWord ? `\\b${escapedWord}\\b` : escapedWord;
+        let regexFlags = caseSensitive ? 'g' : 'gi';
+        const regex = new RegExp(regexPattern, regexFlags);
+        const matches = text.match(regex);
+        if (matches) {
           const highlighted = text.replace(regex, '<strong>$&</strong>');
-          output.classList.remove('loading');
           output.innerHTML = highlighted;
-        } catch (err) {
-          output.classList.add('error');
-          output.textContent = 'Error: Failed to process file. Ensure it’s a valid text file.';
+        } else {
+          output.textContent = 'No matches found.';
         }
-      };
-      reader.onerror = function() {
+      } catch (err) {
         output.classList.add('error');
-        output.classList.remove('loading');
-        output.textContent = 'Error: Could not read the file.';
-      };
-      reader.readAsText(fileInput.files[0]);
+        output.textContent = 'Error: Invalid search term.';
+      }
     }
   </script>
 </body>
